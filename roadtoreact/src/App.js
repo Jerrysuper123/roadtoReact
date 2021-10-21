@@ -41,8 +41,8 @@ function App() {
 
   const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 
-  const storiesReducer=(state, action)=>{
-    switch(action.type){
+  const storiesReducer = (state, action) => {
+    switch (action.type) {
       case "STORIES_FETCH_INIT":
         return {
           ...state,
@@ -52,7 +52,7 @@ function App() {
         }
 
       case "STORIES_FETCH_SUCCESS":
-        return{
+        return {
           ...state,
           isLoading: false,
           isError: false,
@@ -60,7 +60,7 @@ function App() {
         };
 
       case "STORIES_FETCH_FAILURE":
-        return{
+        return {
           ...state,
           isLoading: false,
           isError: true
@@ -69,60 +69,76 @@ function App() {
       case "REMOVE_STORIES":
         return {
           ...state,
-          data: state.data.filter(story=>action.payload.ObjectID!==story.ObjectID)
-        } 
-        
+          data: state.data.filter(story => action.payload.ObjectID !== story.ObjectID)
+        }
+
       default:
         throw new Error();
     }
-  
+
   }
 
   const [stories, dispatchStories] = React.useReducer(
-    storiesReducer,{
-      data: [],
-      isError: false,
-      isLoading: false
-    }
-    );
+    storiesReducer, {
+    data: [],
+    isError: false,
+    isLoading: false
+  }
+  );
 
- 
+
 
   //remove initial story and use promose to delay 2 seconds
-  const getAsyncStories = ()=>
+  const getAsyncStories = () =>
     // new Promise((resolve, reject)=>setTimeout(reject, 2000));
-    new Promise((resolve)=>
+    new Promise((resolve) =>
       setTimeout(
-        ()=>resolve({data:{stories: initialStories}}),
+        () => resolve({ data: { stories: initialStories } }),
         2000
 
-    ))
+      ))
 
-  React.useEffect(()=>{
+  const useSemiPersistentState = (key, initialValue) => {
+    const [value, setValue] = React.useState(
+      localStorage.getItem(key) || initialValue
+    );
+
+    React.useEffect(() => {
+      localStorage.setItem(key, value)
+    }, [value])
+
+    return [value, setValue]
+  }
+
+
+  const [searchTerm, setSearchTerm] = useSemiPersistentState("search", 'react');
+
+  React.useEffect(() => {
     // setIsLoading(true);
     // use dispatch function to replace the original ones
-    dispatchStories({type: 'STORIES_FETCH_INIT'})
+    if (!searchTerm) return;
+    dispatchStories({ type: 'STORIES_FETCH_INIT' })
 
-    fetch(`${API_ENDPOINT}react`)
-    //receive result then turn from string into JSon data
-    .then(response=>response.json())
-    .then(result=>{
-      dispatchStories({
-        type: "STORIES_FETCH_SUCCESS",
-        payload: result.hits
+    fetch(`${API_ENDPOINT}${searchTerm}`)
+      //receive result then turn from string into JSon data
+      .then(response => response.json())
+      .then(result => {
+        dispatchStories({
+          type: "STORIES_FETCH_SUCCESS",
+          payload: result.hits
+        })
+        console.log(result)
+        //why should this be inside
+        // setIsLoading(false);
       })
-      console.log(result)
-      //why should this be inside
-      // setIsLoading(false);
-    })
-    .catch(()=>{
-      // setIsError(true)
-      dispatchStories({type: "STORIES_FETCH_FAILURE"})
-    })
-    
-  },[])
+      .catch(() => {
+        // setIsError(true)
+        dispatchStories({ type: "STORIES_FETCH_FAILURE" })
+      })
 
-  const handRemovedStories=(item)=>{
+  }, [searchTerm])
+
+  const handRemovedStories = (item) => {
     // const newStories = stories.filter(story=>item.ObjectID!==story.ObjectID);
     // setStories(newStories);
     dispatchStories({
@@ -131,28 +147,17 @@ function App() {
     })
   }
 
-  const useSemiPersistentState = (key, initialValue)=>{
-    const [value, setValue] = React.useState(
-      localStorage.getItem(key)||initialValue
-      );
 
-      React.useEffect(()=>{
-        localStorage.setItem(key, value)
-      },[value])
 
-    return [value, setValue]
-  }
 
-  const [searchTerm, setSearchTerm] = useSemiPersistentState("search", 'react');
- 
 
-  const handleSearch = (event)=>{
+  const handleSearch = (event) => {
     setSearchTerm(event.target.value);
   }
 
   //filtered story
   //dont forget return keyword for your function
-  const searchedStories = stories.data.filter(story=>{
+  const searchedStories = stories.data.filter(story => {
     return story.title.toLowerCase().includes(searchTerm.toLowerCase());
   })
 
@@ -161,53 +166,53 @@ function App() {
       <h1>my hacker stories</h1>
       {/* pass children over */}
       <InputWithLabel
-      id="search"
-      label="Search"
-      value={searchTerm}
-      onInputChange={handleSearch}
+        id="search"
+        label="Search"
+        value={searchTerm}
+        onInputChange={handleSearch}
       >
-       <strong>Search:</strong> 
+        <strong>Search:</strong>
       </InputWithLabel>
 
       <hr />
-      {stories.isError?(<p>soemething went wrong</p>): null}
+      {stories.isError ? (<p>soemething went wrong</p>) : null}
 
-      {stories.isLoading?(
+      {stories.isLoading ? (
         <p>is loading...</p>
-      ):(
-        <List 
-      list={searchedStories} 
-      onRemoveItem={handRemovedStories} />
+      ) : (
+        <List
+          list={stories.data}
+          onRemoveItem={handRemovedStories} />
       )}
 
-      
+
 
     </div>
   );
 }
 
-const InputWithLabel=({id, label, value, onInputChange, type="text", children})=>{
-  return(
+const InputWithLabel = ({ id, label, value, onInputChange, type = "text", children }) => {
+  return (
     <div>
-    <label htmlFor={id}>{children}</label>
-    <input id={id} type={type} onChange={onInputChange} value={value}/>
-  </div>
+      <label htmlFor={id}>{children}</label>
+      <input id={id} type={type} onChange={onInputChange} value={value} />
+    </div>
   )
 }
 
 
-const List = ({list, onRemoveItem}) => {
+const List = ({ list, onRemoveItem }) => {
   return (
     <ul>
-      {list.map(item=>{
-        return <Item key={item.objectID} item={item} onRemoveItem={onRemoveItem}/>
+      {list.map(item => {
+        return <Item key={item.objectID} item={item} onRemoveItem={onRemoveItem} />
       })}
     </ul>
 
   );
 }
 
-const Item = ({item, onRemoveItem}) => {
+const Item = ({ item, onRemoveItem }) => {
   return (
     <li>
       <span>
@@ -217,7 +222,7 @@ const Item = ({item, onRemoveItem}) => {
       <span>{item.num_comments}</span>
       <span>{item.points}</span>
       <span>
-        <button type="button" onClick={()=> onRemoveItem(item)}>Dismiss</button>
+        <button type="button" onClick={() => onRemoveItem(item)}>Dismiss</button>
       </span>
     </li>
   );
