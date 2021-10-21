@@ -39,6 +39,8 @@ function App() {
   // const [isLoading, setIsLoading] = React.useState(false);
   // const [isError, setIsError] = React.useState(false);
 
+  const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
+
   const storiesReducer=(state, action)=>{
     switch(action.type){
       case "STORIES_FETCH_INIT":
@@ -101,12 +103,15 @@ function App() {
     // use dispatch function to replace the original ones
     dispatchStories({type: 'STORIES_FETCH_INIT'})
 
-    getAsyncStories()
+    fetch(`${API_ENDPOINT}react`)
+    //receive result then turn from string into JSon data
+    .then(response=>response.json())
     .then(result=>{
       dispatchStories({
         type: "STORIES_FETCH_SUCCESS",
-        payload: result.data.stories
+        payload: result.hits
       })
+      console.log(result)
       //why should this be inside
       // setIsLoading(false);
     })
@@ -184,7 +189,7 @@ function App() {
 const InputWithLabel=({id, label, value, onInputChange, type="text", children})=>{
   return(
     <div>
-    <label htmlfor={id}>{children}</label>
+    <label htmlFor={id}>{children}</label>
     <input id={id} type={type} onChange={onInputChange} value={value}/>
   </div>
   )
@@ -195,7 +200,7 @@ const List = ({list, onRemoveItem}) => {
   return (
     <ul>
       {list.map(item=>{
-        return <Item key={item.ObjectID} item={item} onRemoveItem={onRemoveItem}/>
+        return <Item key={item.objectID} item={item} onRemoveItem={onRemoveItem}/>
       })}
     </ul>
 
