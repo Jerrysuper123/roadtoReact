@@ -67,9 +67,12 @@ function App() {
         };
 
       case "REMOVE_STORIES":
+
+      //initial state to merge with state.data to filter out stories when each story's objectID is not 
+      //the same as the signature
         return {
           ...state,
-          data: state.data.filter(story => action.payload.ObjectID !== story.ObjectID)
+          data: state.data.filter(story => story.objectID!== action.payload.objectID)
         }
 
       default:
@@ -113,9 +116,7 @@ function App() {
 
   const [searchTerm, setSearchTerm] = useSemiPersistentState("search", 'react');
 
-  React.useEffect(() => {
-    // setIsLoading(true);
-    // use dispatch function to replace the original ones
+  const handleFetchStories =React.useCallback(()=>{
     if (!searchTerm) return;
     dispatchStories({ type: 'STORIES_FETCH_INIT' })
 
@@ -135,8 +136,12 @@ function App() {
         // setIsError(true)
         dispatchStories({ type: "STORIES_FETCH_FAILURE" })
       })
+  },[searchTerm])
 
-  }, [searchTerm])
+  React.useEffect(() => {
+  handleFetchStories();
+
+  }, [handleFetchStories])
 
   const handRemovedStories = (item) => {
     // const newStories = stories.filter(story=>item.ObjectID!==story.ObjectID);
