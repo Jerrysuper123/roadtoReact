@@ -115,12 +115,21 @@ function App() {
 
 
   const [searchTerm, setSearchTerm] = useSemiPersistentState("search", 'react');
+  //use useState to contain the APi end poin and search term, initialize with initial value
+  //when user click submit button, setUrl
+  //when url changes, handleFetchStories function is triggered.
+
+  const [url, setUrl] = React.useState(`${API_ENDPOINT}${searchTerm}`);
+
+  const handleSearchSubmit = ()=>{
+    setUrl(`${API_ENDPOINT}${searchTerm}`)
+  }
 
   const handleFetchStories =React.useCallback(()=>{
     if (!searchTerm) return;
     dispatchStories({ type: 'STORIES_FETCH_INIT' })
 
-    fetch(`${API_ENDPOINT}${searchTerm}`)
+    fetch(url)
       //receive result then turn from string into JSon data
       .then(response => response.json())
       .then(result => {
@@ -136,7 +145,7 @@ function App() {
         // setIsError(true)
         dispatchStories({ type: "STORIES_FETCH_FAILURE" })
       })
-  },[searchTerm])
+  },[url])
 
   React.useEffect(() => {
   handleFetchStories();
@@ -156,13 +165,14 @@ function App() {
 
 
 
-  const handleSearch = (event) => {
+  const handleSearchInput = (event) => {
     setSearchTerm(event.target.value);
   }
 
   //filtered story
   //dont forget return keyword for your function
   const searchedStories = stories.data.filter(story => {
+    if(!story.title) return;
     return story.title.toLowerCase().includes(searchTerm.toLowerCase());
   })
 
@@ -174,10 +184,18 @@ function App() {
         id="search"
         label="Search"
         value={searchTerm}
-        onInputChange={handleSearch}
+        onInputChange={handleSearchInput}
       >
         <strong>Search:</strong>
       </InputWithLabel>
+
+      <button
+      type="button"
+      disabled={!searchTerm}
+      onClick={handleSearchSubmit}
+      >
+        Submit
+      </button>
 
       <hr />
       {stories.isError ? (<p>soemething went wrong</p>) : null}
