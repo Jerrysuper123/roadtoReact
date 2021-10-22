@@ -1,6 +1,7 @@
 // import logo from './logo.svg';
 import './App.css';
 import React from 'react';
+import axios from 'axios';
 
 
 function App() {
@@ -129,15 +130,16 @@ function App() {
     if (!searchTerm) return;
     dispatchStories({ type: 'STORIES_FETCH_INIT' })
 
-    fetch(url)
-      //receive result then turn from string into JSon data
-      .then(response => response.json())
+    axios
+      .get(url)
+      //axios straightaway turns string into json
       .then(result => {
+        console.log(result)
         dispatchStories({
           type: "STORIES_FETCH_SUCCESS",
-          payload: result.hits
+          payload: result.data.hits
         })
-        console.log(result)
+      
         //why should this be inside
         // setIsLoading(false);
       })
@@ -172,8 +174,11 @@ function App() {
   //filtered story
   //dont forget return keyword for your function
   const searchedStories = stories.data.filter(story => {
-    if(!story.title) return;
-    return story.title.toLowerCase().includes(searchTerm.toLowerCase());
+    if(!story.title) {
+      return;
+    } else {
+      return story.title.toLowerCase().includes(searchTerm.toLowerCase());
+    }
   })
 
   return (
