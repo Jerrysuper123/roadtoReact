@@ -69,11 +69,11 @@ function App() {
 
       case "REMOVE_STORIES":
 
-      //initial state to merge with state.data to filter out stories when each story's objectID is not 
-      //the same as the signature
+        //initial state to merge with state.data to filter out stories when each story's objectID is not 
+        //the same as the signature
         return {
           ...state,
-          data: state.data.filter(story => story.objectID!== action.payload.objectID)
+          data: state.data.filter(story => story.objectID !== action.payload.objectID)
         }
 
       default:
@@ -122,17 +122,17 @@ function App() {
 
   const [url, setUrl] = React.useState(`${API_ENDPOINT}${searchTerm}`);
 
-  const handleSearchSubmit = ()=>{
+  const handleSearchSubmit = () => {
     setUrl(`${API_ENDPOINT}${searchTerm}`)
   }
 
-  const handleFetchStories =React.useCallback( async ()=>{
+  const handleFetchStories = React.useCallback(async () => {
     if (!searchTerm) return;
     dispatchStories({ type: 'STORIES_FETCH_INIT' })
 
     //promise is so confusing. use try and catch in async and await
 
-    try{
+    try {
       const result = await axios.get(url);
 
       dispatchStories({
@@ -140,14 +140,14 @@ function App() {
         payload: result.data.hits
       })
 
-    } catch{
-       // setIsError(true)
-       dispatchStories({ type: "STORIES_FETCH_FAILURE" })
+    } catch {
+      // setIsError(true)
+      dispatchStories({ type: "STORIES_FETCH_FAILURE" })
     }
-  },[url])
+  }, [url])
 
   React.useEffect(() => {
-  handleFetchStories();
+    handleFetchStories();
 
   }, [handleFetchStories])
 
@@ -166,12 +166,13 @@ function App() {
 
   const handleSearchInput = (event) => {
     setSearchTerm(event.target.value);
+    event.preventDefault();
   }
 
   //filtered story
   //dont forget return keyword for your function
   const searchedStories = stories.data.filter(story => {
-    if(!story.title) {
+    if (!story.title) {
       return;
     } else {
       return story.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -179,27 +180,15 @@ function App() {
   })
 
   return (
-    <div>
-      <h1>my hacker stories</h1>
+    <div className="container">
+      <h1 className="headline-primary">my hacker stories</h1>
       {/* pass children over */}
-      <InputWithLabel
-        id="search"
-        label="Search"
-        value={searchTerm}
-        onInputChange={handleSearchInput}
-      >
-        <strong>Search:</strong>
-      </InputWithLabel>
 
-      <button
-      type="button"
-      disabled={!searchTerm}
-      onClick={handleSearchSubmit}
-      >
-        Submit
-      </button>
-
-      <hr />
+      <SearchForm
+        searchTerm={searchTerm}
+        onSearchInput={handleSearchInput}
+        onSearchSubmit={handleSearchSubmit}
+      />
       {stories.isError ? (<p>soemething went wrong</p>) : null}
 
       {stories.isLoading ? (
@@ -216,11 +205,46 @@ function App() {
   );
 }
 
+const SearchForm = ({
+  searchTerm,
+  onSearchInput,
+  onSearchSubmit
+}) => {
+  return (
+    <form onSubmit={onSearchSubmit}
+    className="search-form"
+    >
+      <InputWithLabel
+        id="search"
+        label="Search"
+        value={searchTerm}
+        onInputChange={onSearchInput}
+      >
+        <strong>Search:</strong>
+      </InputWithLabel>
+
+      <button
+        className="button button_large"
+        type="submit"
+        disabled={!searchTerm}
+      // onClick={handleSearchSubmit}
+      >
+        Submit
+      </button>
+
+    </form>
+  );
+}
+
 const InputWithLabel = ({ id, label, value, onInputChange, type = "text", children }) => {
   return (
     <div>
-      <label htmlFor={id}>{children}</label>
-      <input id={id} type={type} onChange={onInputChange} value={value} />
+      <label htmlFor={id}
+      className='label'
+      >{children}</label>
+      <input 
+      className='input'
+      id={id} type={type} onChange={onInputChange} value={value} />
     </div>
   )
 }
@@ -239,15 +263,20 @@ const List = ({ list, onRemoveItem }) => {
 
 const Item = ({ item, onRemoveItem }) => {
   return (
-    <li>
-      <span>
+    <li className="item">
+      <span style={{width: '40%'}}>
         <a href={item.url}> {item.title}</a>
       </span>
-      <span>{item.author}</span>
-      <span>{item.num_comments}</span>
-      <span>{item.points}</span>
-      <span>
-        <button type="button" onClick={() => onRemoveItem(item)}>Dismiss</button>
+      <span style={{width:'30%'}}>{item.author}</span>
+      <span style={{width: '10%'}}>{item.num_comments}</span>
+      <span style={{width: '10%'}}>{item.points}</span>
+      <span style={{width: '10%'}}>
+        <button 
+        type="button" 
+        onClick={() => onRemoveItem(item)}
+        className='button button_small'
+        >
+          Dismiss</button>
       </span>
     </li>
   );
