@@ -1,0 +1,9 @@
+.button {
+  background: coral;
+  color: blue;
+  padding: 5px;
+}
+
+.buttonLarge {
+  padding: 50px;
+}

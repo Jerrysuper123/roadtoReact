@@ -2,6 +2,21 @@
 import "./App.scss";
 import React from "react";
 import axios from "axios";
+//playing with module css
+import styles from "./buttonCss.module.css";
+import styled from "styled-components";
+
+//must use capital S
+const StyledButton = styled.button`
+  background: green;
+  color: white;
+  // there is not auto completion
+  border: 1px solid black;
+  &:hover {
+    background: white;
+    color: black;
+  }
+`;
 
 function App() {
   const initialStories = [
@@ -213,6 +228,14 @@ const SearchForm = ({
       >
         Submit
       </button>
+
+      {/* <button className={`${styles.button}${styles.buttonLarge}`}>
+       */}
+      {/* did not receive an error when styling is not defined */}
+      <button className={styles.button}>
+        use this button to try css modules
+      </button>
+      <StyledButton>button using styled components</StyledButton>
     </form>
   );
 };
