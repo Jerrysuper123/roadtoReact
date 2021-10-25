@@ -1,0 +1,6 @@
+@import './container';
+
+.contact{
+    @extend .container;
+    background: coral;
+  }

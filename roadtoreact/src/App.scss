@@ -1,0 +1,75 @@
+@import './variables';
+@import './container';
+@import './contact';
+
+// create a function to customize styling
+@mixin flexAlign($attribute) {
+  display: flex;
+  align-items: $attribute;
+}
+
+.headline-primary{
+  font-size: 48px;
+  font-weight: 300;
+  letter-spacing: 2px;
+}
+
+.item{
+  @include flexAlign(center);
+  padding-bottom: 5px;
+  span{
+    padding: 0 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    a{
+      color: inherit;
+    }
+  }
+}
+
+.button{
+  background: transparent;
+  border: $primaryBorder;
+  padding: 5px;
+  cursor: pointer;
+  transition: all 0.1s ease-in;
+  &:hover{
+    background: $primaryColor;
+    color: #ffffff;
+  }
+}
+
+.button_small{
+  padding: 5px;
+}
+
+.button_large{
+  padding: 10px;
+}
+
+.search-form{
+  padding: 10px 0 20px 0;
+  /* flex everything in a row, like flex muscles horizontally */
+  display: flex;
+  @include flexAlign(baseline);
+  // align-items: baseline;
+  .label{
+    border-top: $primaryBorder;
+    border-left: $primaryBorder;
+    padding-left: 5px;
+  
+    font-size: 24px;
+  }
+  .input{
+    border: none;
+    border-bottom: $primaryBorder;
+    background: transparent;
+    font-size: 24px;
+  }
+}
+
+
+
+
+
