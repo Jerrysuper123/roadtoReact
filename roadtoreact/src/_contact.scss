@@ -1,6 +1,7 @@
-@import './container';
+@import "./container";
 
-.contact{
-    @extend .container;
-    background: coral;
-  }
+.contact {
+  @extend .container;
+  background: coral;
+  display: flex;
+}

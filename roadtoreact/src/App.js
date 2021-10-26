@@ -6,6 +6,11 @@ import axios from "axios";
 import styles from "./buttonCss.module.css";
 import styled from "styled-components";
 
+import { ReactComponent as Check } from "./check.svg";
+import { ReactComponent as ControlPanel } from "./controlPanel.svg";
+import { BsFillAlarmFill } from "react-icons/bs";
+import { IconContext } from "react-icons";
+
 //must use capital S
 const StyledButton = styled.button`
   background: green;
@@ -109,12 +114,21 @@ function App() {
     );
 
   const useSemiPersistentState = (key, initialValue) => {
+    //use useref not the render the first time
+    const isMounted = React.useReducer(false);
+
     const [value, setValue] = React.useState(
       localStorage.getItem(key) || initialValue
     );
 
     React.useEffect(() => {
-      localStorage.setItem(key, value);
+      //we do not need store initialvalue react, becos this is not provided by users
+      if (!isMounted.current) {
+        isMounted.current = true;
+      } else {
+        console.log("A");
+        localStorage.setItem(key, value);
+      }
     }, [value]);
 
     return [value, setValue];
@@ -197,7 +211,18 @@ function App() {
         <List list={stories.data} onRemoveItem={handRemovedStories} />
       )}
 
-      <div className="contact">contact me here</div>
+      <div className="contact">
+        <p> contact me here</p>
+        <br />
+        <ControlPanel className="controlPanel" />
+
+        {/* use IconContext provide to style the react icons */}
+        <IconContext.Provider value={{ color: "red", className: "alarm" }}>
+          <div>
+            <BsFillAlarmFill />
+          </div>
+        </IconContext.Provider>
+      </div>
     </div>
   );
 }
@@ -291,7 +316,7 @@ const Item = ({ item, onRemoveItem }) => {
           onClick={() => onRemoveItem(item)}
           className="button button_small"
         >
-          Dismiss
+          <Check height="10px" width="10px" />
         </button>
       </span>
     </li>
